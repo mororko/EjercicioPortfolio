@@ -1,67 +1,67 @@
 import "./style.scss";
 
-// Seleccionar elementos del formulario
-const form = document.querySelector(".contact-form");
-const formControls = document.querySelectorAll(".form-control");
-const inputName = document.getElementById("name");
-const inputEmail = document.getElementById("email");
-const inputMessage = document.getElementById("message");
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector(".contact-form");
+  const inputs = form.querySelectorAll("input, textarea");
 
-// Función de validación de email usando regex simple
-function isValidEmail(email) {
-  // Regex básico para validar email (formato general)
-  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-  return emailRegex.test(email);
-}
-
-// Manejar el submit del formulario
-form.addEventListener("submit", (e) => {
-  e.preventDefault(); // prevenir envío real
-  let formIsValid = true;
-
-  // Validar campo Nombre (no vacío)
-  if (inputName.value.trim() === "") {
-    markFieldAsError(inputName);
-    formIsValid = false;
-  } else {
-    clearFieldError(inputName);
+  // Validacion de email
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  // Validar campo Email (no vacío y formato correcto)
-  if (
-    inputEmail.value.trim() === "" ||
-    !isValidEmail(inputEmail.value.trim())
-  ) {
-    markFieldAsError(inputEmail);
-    formIsValid = false;
-  } else {
-    clearFieldError(inputEmail);
+  //Validamos un campo input
+  function validateField(input) {
+    const control = input.parentElement;
+    const value = input.value.trim();
+
+    //Limpiar estado previo
+    control.classList.remove("valid", "invalid");
+
+    //Comprueba si esta vacio
+    if (value === "") {
+      control.classList.add("invalid");
+      return false;
+    }
+
+    // Si es mail, comprueba si es valido
+    if (input.type === "email" && !isValidEmail(value)) {
+      control.classList.add("invalid");
+      return false;
+    }
+
+    // Si todo ok
+    control.classList.add("valid");
+    return true;
   }
 
-  // Validar campo Mensaje (no vacío)
-  if (inputMessage.value.trim() === "") {
-    markFieldAsError(inputMessage);
-    formIsValid = false;
-  } else {
-    clearFieldError(inputMessage);
-  }
+  // Validacion al escribir
+  inputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      validateField(input);
+    });
+  });
 
-  // Si todo válido, podemos “enviar” (aquí simplemente resetear formulario o dar feedback)
-  if (formIsValid) {
-    alert("Mensaje enviado!"); // Aquí podrías mostrar un modal de éxito en lugar de alert
-    form.reset();
-    // Opcional: limpiar estados de error si hubiese
-    formControls.forEach((fc) => fc.classList.remove("invalid"));
-  }
+  // Validacion al enviar el formulario
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    let formIsValid = true;
+
+    //validamos los campos
+    inputs.forEach((input) => {
+      const valid = validateField(input);
+      if (!valid) {
+        formIsValid = false;
+      }
+    });
+
+    if (formIsValid) {
+      // Si todo es correcto
+      alert("Formulario enviado correctamente");
+      form.reset();
+      //Limpiar todo
+      inputs.forEach((input) => {
+        input.parentElement.classList.remove("valid", "invalid");
+      });
+    }
+  });
 });
-
-// Funciones para marcar/desmarcar errores visualmente
-function markFieldAsError(inputElement) {
-  const formControl = inputElement.parentElement;
-  formControl.classList.add("invalid");
-}
-
-function clearFieldError(inputElement) {
-  const formControl = inputElement.parentElement;
-  formControl.classList.remove("invalid");
-}
